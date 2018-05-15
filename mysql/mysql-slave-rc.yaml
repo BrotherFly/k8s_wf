@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: mysql-slave
+  labels:
+    name: mysql-slave
+spec:
+  replicas: 1
+  selector:
+    name: mysql-slave
+  template:
+    metadata:
+      labels:
+        name: mysql-slave
+    spec:
+      containers:
+      - name: master
+        image: 121.195.169.157:5000/brotherfly/mysql-slave:1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "12345678"
+        - name: MYSQL_REPLICATION_USER
+          value: "brotherfly"
+        - name: MYSQL_PASSWORD
+          value: "12345678"
+

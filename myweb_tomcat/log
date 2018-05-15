@@ -1,0 +1,4 @@
+docker run -v /root/wf/PSMS.war:/usr/local/tomcat/webapps/PSMS.war -p 8080:8080 docker.io/tomcat  挂载本地war
+ 
+
+docker run -p 8080:8080 brotherfly/myweb_tomcat:v1

@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+ name: mysql-master
+ labels:
+  name: mysql-master
+spec:
+  replicas: 1
+  selector:
+   name: mysql-master
+  template:
+   metadata:
+    labels:
+     name: mysql-master
+   spec:
+    containers:
+    - name: mysql-master
+      image: 121.195.169.157:5000/brotherfly/mysql-master:1.0
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: mysql-master-data
+      ports:
+      - containerPort: 3306
+      env:
+      - name: MYSQL_ROOT_PASSWORD
+        value: "12345678"
+      - name: MYSQL_REPLICATION_USER
+        value: "brotherfly"
+      - name: MYSQL_REPLICAITON_PASSWORD
+        value: "12345678"
+    volumes:
+     - name: mysql-master-data
+       persistentVolumeClaim:
+        claimName: pv-nfs-mysql-master
