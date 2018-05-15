@@ -62,15 +62,12 @@ mysql build
 	[root@master distributed-load-testing-using-kubernetes-master]# kubectl create -f ingress.yaml
 	ingress "traefik-ingress" created
 
+docker 错误“server gave HTTP response to HTTPS client”
+	在”/etc/docker/“目录下，创建”daemon.json“文件。在文件中写入：
+	{ "insecure-registries":["192.168.1.100:5000"] }
+	重启docker服务：service docker restart
 
- kubectl delete -f sample-webapp-controller.yaml 
-
-kubectl delete -f sample-webapp-service.yaml  
-
-kubectl delete -f locust-master-controller.yaml  
-
- kubectl delete -f locust-master-service.yaml 
-
-kubectl delete -f locust-worker-controller.yaml
+强制删除pod
+	kubectl delete pods <pod> --grace-period=0 --force
 	
 
