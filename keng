@@ -1,0 +1,76 @@
+创建mysql镜像
+	mkdir -p ~/mysql/data ~/mysql/logs ~/mysql/conf
+		data目录将映射为mysql容器配置的数据文件存放路径
+		logs目录将映射为mysql容器的日志目录
+		conf目录里的配置文件将映射为mysql容器的配置文件
+	docker pull mysql   拉取镜像
+	docker run --name mymysql -p 3306:3306 -v ${PWD}/mysql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456 -d mysql
+	docker stop mymysql
+	docker run -d -p 127.0.0.1:3306:3306 -v ${PWD}/mysql/data:/var/lib/mysql mysql
+	docker run --name mymysql -p 3306:3306 -v /root/mysql/mysql/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456 -d mysql
+
+Docker 删除镜像docker rmi -f registry:5000/pause-amd64:3.0
+mysql build	
+	
+解决docker build超时问题
+	Dockerfile 添加源
+
+	RUN sed -i "s/archive.ubuntu./mirrors.aliyun./g" /etc/apt/sources.list
+	RUN sed -i "s/deb.debian.org/mirrors.aliyun.com/g" /etc/apt/sources.list
+	RUN sed -i "s/security.debian.org/mirrors.aliyun.com\/debian-security/g" /etc/apt/sources.list
+
+部署本地仓库	
+	docker pull docker.io/registry
+	docker run -d -p 5000:5000 --name=registry --restart=always --privileged=true  --log-driver=none -v /home/data/registrydata:/tmp/registry registry
+	docker tag 37283f08846a 121.195.169.157:5000/brotherfly/mysql-master:1.0
+	docker push 121.195.169.157:5000/brotherfly/mysql-master:1.0
+
+	修改/etc/docker/daemon.json {"insecure-registries":["121.195.169.157:5000"]}
+
+创建pv和pvc，用于mysql主从存储持久化数据
+	# cd /home/
+	# mkdir mysql_master mysql_slave
+      yaml文件 k8s_wf/mysql/Storage
+搭建mysql 主从 集群
+	PATH   /root/k8s_wf/mysql/Dockerfiles
+配置rancher
+	docker run -d --restart=unless-stopped -p 8081:8081 -p 1443:1443 rancher/rancher
+	访问地址：https://121.195.169.157    不加端口号
+
+配置dashboard/heapster/influxdb
+	用于监控CPU 和内存数据
+	yaml文件地址/root/k8s_wf/heapster+inflyxdb
+	docker pull k8s.gcr.io/heapster-influxdb-amd64:v1.3.3
+	docker pull k8s.gcr.io/heapster-amd64:v1.4.2
+
+部署nginx
+	docker pull nginx
+部署traefik
+	地址/root/k8s_wf/traefik/examples/k8s
+	kubectl create -f traefik-rbac.yaml
+	kubectl create -f traefik-deployment.yaml
+	url:121.195.169.136:63339
+分布式负载测试
+	https://www.kubernetes.org.cn/1895.html
+	文件/root/k8s_wf/distributed-load-testing-using-kubernetes-master/kubernetes-config
+	kubectl create -f sample-webapp-controller.yaml 
+	kubectl create -f sample-webapp-service.yaml  
+	kubectl create -f locust-master-controller.yaml  
+	kubectl create -f locust-master-service.yaml 
+	kubectl create -f locust-worker-controller.yaml
+
+	[root@master distributed-load-testing-using-kubernetes-master]# kubectl create -f ingress.yaml
+	ingress "traefik-ingress" created
+
+
+ kubectl delete -f sample-webapp-controller.yaml 
+
+kubectl delete -f sample-webapp-service.yaml  
+
+kubectl delete -f locust-master-controller.yaml  
+
+ kubectl delete -f locust-master-service.yaml 
+
+kubectl delete -f locust-worker-controller.yaml
+	
+
